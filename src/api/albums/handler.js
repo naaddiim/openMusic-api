@@ -1,3 +1,4 @@
+/* eslint-disable require-jsdoc */
 const ClientError = require('../../exceptions/ClientError')
 
 class AlbumsHandler {
@@ -13,12 +14,12 @@ class AlbumsHandler {
         try {
             this._validator.validateAlbumPayload(request.payload)
             const { name, year } = request.payload
-            const albumId = await this._service.addAlbum({ name, year })
+            const album = await this._service.addAlbum({ name, year })
 
             const response = h.response({
                 status: 'success',
                 data: {
-                    albumId: 'album-' + albumId
+                    albumId: album.id,
                 },
             })
             response.code(201)
@@ -38,7 +39,6 @@ class AlbumsHandler {
                 message: 'Maaf, terjadi kegagalan pada server kami.',
             })
             response.code(500)
-            console.error(error)
             return response
         }
     }
@@ -47,15 +47,17 @@ class AlbumsHandler {
         try {
             const { id } = request.params
             const album = await this._service.getAlbumById(id)
+            const song = await this._service.getSongByAlbumId(album.id)
 
             const response = h.response({
                 status: 'success',
                 data: {
                     album: {
-                        id: 'album-' + album.id,
+                        id: album.id,
                         name: album.name,
-                        year: album.year
-                    }
+                        year: album.year,
+                        songs: song,
+                    },
                 },
             })
             response.code(200)
@@ -75,7 +77,6 @@ class AlbumsHandler {
                 message: 'Maaf, terjadi kegagalan pada server kami.',
             })
             response.code(500)
-            console.error(error)
             return response
         }
     }
@@ -88,37 +89,34 @@ class AlbumsHandler {
 
             const response = h.response({
                 status: 'success',
-                message: 'Album berhasil diubah !'
+                message: 'Album berhasil diubah !',
             })
             response.code(200)
             return response
-
         } catch (error) {
             if (error instanceof ClientError) {
                 const response = h.response({
                     status: 'fail',
                     message: error.message,
-                });
+                })
                 response.code(error.statusCode)
-                return response;
+                return response
             }
             const response = h.response({
                 status: 'error',
                 message: 'Maaf, terjadi kegagalan pada server kami.',
-            });
+            })
             response.code(500)
-            console.error(error)
             return response
         }
     }
     deleteAlbumByIdHandler = async (request, h) => {
-
         try {
             const { id } = request.params
-            await this.service.deleteAlbumById(id)
+            await this._service.deleteAlbumById(id)
             const response = h.response({
                 status: 'success',
-                message: 'Album berhasil dihapus !'
+                message: 'Album berhasil dihapus !',
             })
             response.code(200)
             return response

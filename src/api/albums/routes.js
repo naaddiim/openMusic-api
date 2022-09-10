@@ -1,4 +1,4 @@
-const routes = ({postAlbumHandler, getAlbumByIdHandler, putAlbumByIdHandler, deleteAlbumByIdHandler}) => [
+const routes = ({ postAlbumHandler, getAlbumByIdHandler, putAlbumByIdHandler, deleteAlbumByIdHandler }) => [
     {
         method: 'POST',
         path: '/albums',

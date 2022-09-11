@@ -10,13 +10,13 @@ class SongsService {
     }
 
     async addSong({ title, year, genre, performer, duration, albumId }) {
-        const id = nanoid(16)
+        const id = `song-${nanoid(16)}`
         const createdAt = new Date().toISOString()
         const updatedAt = createdAt
 
         const query = {
             text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
-            values: ['song-' + id, title, year, genre, performer, duration, albumId, createdAt, updatedAt],
+            values: [id, title, year, genre, performer, duration, albumId, createdAt, updatedAt],
         }
 
         const result = await this._pool.query(query)
@@ -35,7 +35,7 @@ class SongsService {
             }
             const result = await this._pool.query(query)
 
-            if (!result.rows.length) {
+            if (!result.rowCount) {
                 throw new NotFoundError('Songs tidak ditemukan')
             }
             return result.rows
@@ -47,7 +47,7 @@ class SongsService {
             }
             const result = await this._pool.query(query)
 
-            if (!result.rows.length) {
+            if (!result.rowCount) {
                 throw new NotFoundError('title tidak ditemukan')
             }
             return result.rows
@@ -59,7 +59,7 @@ class SongsService {
             }
             const result = await this._pool.query(query)
 
-            if (!result.rows.length) {
+            if (!result.rowCount) {
                 throw new NotFoundError('performer tidak ditemukan')
             }
             return result.rows
@@ -72,7 +72,7 @@ class SongsService {
             }
             const result = await this._pool.query(query)
 
-            if (!result.rows.length) {
+            if (!result.rowCount) {
                 result.rows
             }
             return result.rows
@@ -85,7 +85,7 @@ class SongsService {
         }
         const result = await this._pool.query(query)
 
-        if (!result.rows.length) {
+        if (!result.rowCount) {
             throw new NotFoundError('Songs tidak ditemukan')
         }
 
@@ -102,7 +102,7 @@ class SongsService {
 
         const result = await this._pool.query(query)
 
-        if (!result.rows.length) {
+        if (!result.rowCount) {
             throw new NotFoundError('Gagal memperbarui Songs. Id tidak ditemukan')
         }
     }
@@ -113,7 +113,7 @@ class SongsService {
             values: [id],
         }
         const result = await this._pool.query(query)
-        if (!result.rows.length) {
+        if (!result.rowCount) {
             throw new NotFoundError('Songs gagal dihapus. Id tidak ditemukan')
         }
     }

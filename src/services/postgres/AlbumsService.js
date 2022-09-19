@@ -9,7 +9,7 @@ class AlbumsService {
         this._pool = new Pool()
     }
 
-    async addAlbum({ name, year }) {
+    addAlbum = async ({ name, year }) => {
         const id = `album-${nanoid(16)}`
         const createdAt = new Date().toISOString()
         const updatedAt = createdAt
@@ -27,7 +27,7 @@ class AlbumsService {
         return result.rows[0]
     }
 
-    async getAlbumById(id) {
+    getAlbumById = async (id) => {
         const query = {
             text: 'SELECT id, name, year FROM albums WHERE id = $1',
             values: [id],
@@ -40,7 +40,7 @@ class AlbumsService {
         return result.rows[0]
     }
 
-    async getSongByAlbumId(id) {
+    getSongByAlbumId = async (id) => {
         const query = {
             text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
             values: [id],
@@ -53,7 +53,7 @@ class AlbumsService {
         return result.rows
     }
 
-    async editAlbumById(id, { name, year }) {
+    editAlbumById = async (id, { name, year }) => {
         const updatedAt = new Date().toISOString()
         const query = {
             text: 'UPDATE albums SET name = $1, year = $2, updated_at = $3 WHERE id = $4 RETURNING id',
@@ -67,7 +67,7 @@ class AlbumsService {
         }
     }
 
-    async deleteAlbumById(id) {
+    deleteAlbumById = async (id) => {
         const query = {
             text: 'DELETE FROM albums WHERE id = $1 RETURNING id',
             values: [id],

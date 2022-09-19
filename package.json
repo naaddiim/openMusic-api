@@ -1,7 +1,7 @@
 {
   "name": "openmusic-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Project dibuat untuk tujuan pembelajaran Fundamental Back-End oleh Dicoding Indonesia",
   "main": "index.js",
   "scripts": {
     "start-prod": "NODE_ENV=production node ./src/server.js",
@@ -14,9 +14,13 @@
   "license": "ISC",
   "dependencies": {
     "@hapi/hapi": "^20.2.2",
+    "@hapi/jwt": "^3.0.0",
+    "auto-bind": "^4.0.0",
+    "bcrypt": "^5.0.1",
     "dotenv": "^16.0.2",
     "joi": "^17.6.0",
     "nanoid": "^3.3.4",
+    "node-pg-migrate": "^6.2.2",
     "pg": "^8.8.0"
   },
   "devDependencies": {

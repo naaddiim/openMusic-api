@@ -9,7 +9,7 @@ class SongsService {
         this._pool = new Pool()
     }
 
-    async addSong({ title, year, genre, performer, duration, albumId }) {
+    addSong = async ({ title, year, genre, performer, duration, albumId }) => {
         const id = `song-${nanoid(16)}`
         const createdAt = new Date().toISOString()
         const updatedAt = createdAt
@@ -22,13 +22,13 @@ class SongsService {
         const result = await this._pool.query(query)
 
         if (!result.rows[0].id) {
-            throw new InvariantError('Album gagal ditambahkan')
+            throw new InvariantError('Song gagal ditambahkan')
         }
 
         return result.rows[0].id
     }
 
-    async getSongs(title, performer) {
+    getSongs = async (title, performer) => {
         if (performer === undefined && title === undefined) {
             const query = {
                 text: 'SELECT id, title, performer FROM songs',
@@ -78,7 +78,7 @@ class SongsService {
             return result.rows
         }
     }
-    async getSongById(id) {
+    getSongById = async (id) => {
         const query = {
             text: 'SELECT id, title, year, performer, genre, duration, album_id FROM songs WHERE id = $1',
             values: [id],
@@ -92,7 +92,7 @@ class SongsService {
         return result.rows[0]
     }
 
-    async editSongById(id, { title, year, genre, performer, duration, albumId }) {
+    editSongById = async (id, { title, year, genre, performer, duration, albumId }) => {
         const updatedAt = new Date().toISOString()
         const query = {
             // eslint-disable-next-line max-len
@@ -107,7 +107,7 @@ class SongsService {
         }
     }
 
-    async deleteSongById(id) {
+    deleteSongById = async (id) => {
         const query = {
             text: 'DELETE FROM songs WHERE id = $1 RETURNING ID',
             values: [id],

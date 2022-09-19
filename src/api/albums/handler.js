@@ -1,27 +1,22 @@
 /* eslint-disable require-jsdoc */
+const autoBind = require('auto-bind')
+const { successResponse } = require('../../utils/responses')
 
 class AlbumsHandler {
     constructor(service, validator) {
         this._service = service
         this._validator = validator
-        this.postAlbumHandler = this.postAlbumHandler.bind(this)
-        this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this)
-        this.putAlbumByIdHandler = this.putAlbumByIdHandler.bind(this)
-        this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this)
+        autoBind(this)
     }
     postAlbumHandler = async (request, h) => {
         this._validator.validateAlbumPayload(request.payload)
         const { name, year } = request.payload
         const album = await this._service.addAlbum({ name, year })
 
-        const response = h.response({
-            status: 'success',
-            data: {
-                albumId: album.id,
-            },
+        return successResponse(h, {
+            responseData: { albumId: album.id },
+            responseCode: 201,
         })
-        response.code(201)
-        return response
     }
 
     getAlbumByIdHandler = async (request, h) => {
@@ -29,9 +24,8 @@ class AlbumsHandler {
         const album = await this._service.getAlbumById(id)
         const song = await this._service.getSongByAlbumId(album.id)
 
-        const response = h.response({
-            status: 'success',
-            data: {
+        return successResponse(h, {
+            responseData: {
                 album: {
                     id: album.id,
                     name: album.name,
@@ -40,8 +34,6 @@ class AlbumsHandler {
                 },
             },
         })
-        response.code(200)
-        return response
     }
     putAlbumByIdHandler = async (request, h) => {
         this._validator.validateAlbumPayload(request.payload)
@@ -49,22 +41,16 @@ class AlbumsHandler {
         const { id } = request.params
         await this._service.editAlbumById(id, { name, year })
 
-        const response = h.response({
-            status: 'success',
-            message: 'Album berhasil diubah !',
+        return successResponse(h, {
+            responseMessage: 'Album berhasil diubah !',
         })
-        response.code(200)
-        return response
     }
     deleteAlbumByIdHandler = async (request, h) => {
         const { id } = request.params
         await this._service.deleteAlbumById(id)
-        const response = h.response({
-            status: 'success',
-            message: 'Album berhasil dihapus !',
+        return successResponse(h, {
+            responseMessage: 'Album berhasil dihapus !',
         })
-        response.code(200)
-        return response
     }
 }
 module.exports = AlbumsHandler

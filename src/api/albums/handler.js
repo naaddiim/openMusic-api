@@ -31,6 +31,7 @@ class AlbumsHandler {
                     name: album.name,
                     year: album.year,
                     songs: song,
+                    coverUrl: album.cover,
                 },
             },
         })
@@ -51,6 +52,29 @@ class AlbumsHandler {
         return successResponse(h, {
             responseMessage: 'Album berhasil dihapus !',
         })
+    }
+    postAlbumLikesHandler = async (request, h) => {
+        const { id: albumId } = request.params
+        const { id: userId } = request.auth.credentials
+        await this._service.verifyAlbum(albumId)
+        const message = await this._service.isAlbumLiked(userId, albumId)
+        return successResponse(h, {
+            responseMessage: message,
+            responseCode: 201,
+        })
+    }
+    getAlbumLikesHandler = async (request, h) => {
+        const { id: albumId } = request.params
+        const likes = await this._service.getAlbumLike(albumId)
+        const response = h.response({
+            status: 'success',
+            data: {
+                likes: likes.result,
+            },
+        })
+        response.header('X-Data-Source', likes.isCached)
+        response.code(200)
+        return response
     }
 }
 module.exports = AlbumsHandler

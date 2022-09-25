@@ -1,4 +1,5 @@
-const routes = ({ postAlbumHandler, getAlbumByIdHandler, putAlbumByIdHandler, deleteAlbumByIdHandler }) => [
+const routes = ({ postAlbumHandler, getAlbumByIdHandler, putAlbumByIdHandler, deleteAlbumByIdHandler,
+    postAlbumLikesHandler, getAlbumLikesHandler }) => [
     {
         method: 'POST',
         path: '/albums',
@@ -18,6 +19,19 @@ const routes = ({ postAlbumHandler, getAlbumByIdHandler, putAlbumByIdHandler, de
         method: 'DELETE',
         path: '/albums/{id}',
         handler: deleteAlbumByIdHandler,
+    },
+    {
+        method: 'POST',
+        path: '/albums/{id}/likes',
+        handler: postAlbumLikesHandler,
+        options: {
+            auth: 'openMusic_jwt',
+        },
+    },
+    {
+        method: 'GET',
+        path: '/albums/{id}/likes',
+        handler: getAlbumLikesHandler,
     },
 ]
 

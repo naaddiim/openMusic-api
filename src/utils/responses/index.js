@@ -16,16 +16,10 @@ const failResponse = (h, error) => {
         message: error.message,
     }).code(error.statusCode)
 }
-const failAuthResponse = (h, error) => {
-    return h.response({
-        status: 'fail',
-        message: error.message,
-    }).code(401)
-}
 const errorResponse = (h) => {
     return h.response({
         status: 'error',
         message: 'Ada kesalahan teknis pada server',
     }).code(500)
 }
-module.exports = { successResponse, failResponse, errorResponse, failAuthResponse }
+module.exports = { successResponse, failResponse, errorResponse }

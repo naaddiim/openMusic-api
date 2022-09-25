@@ -1,15 +1,17 @@
-require('dotenv').config(
-    { override: true },
-)
+require('dotenv').config({ override: true })
+const config = require('./utils/config')
 // Plugin
 const Jwt = require('@hapi/jwt')
 const Hapi = require('@hapi/hapi')
+const Inert = require('@hapi/inert')
 const albums = require('./api/albums')
 const songs = require('./api/songs')
 const users = require('./api/users')
 const playlists = require('./api/playlists')
 const authentications = require('./api/authentications')
 const collaborations = require('./api/collaborations')
+const _exports = require('./api/exports')
+const uploads = require('./api/uploads')
 // Services
 const AlbumsService = require('./services/postgres/AlbumsService')
 const AuthenticationsService = require('./services/postgres/AuthenticationsServices')
@@ -17,6 +19,9 @@ const SongsService = require('./services/postgres/SongsService')
 const UsersService = require('./services/postgres/UsersService')
 const PlaylistsService = require('./services/postgres/PlaylistsService')
 const CollaborationsService = require('./services/postgres/CollaborationsService')
+const producerService = require('./services/rabbitmq/ProducerService')
+const StorageService = require('./services/s3/StorageService')
+const CacheService = require('./services/redis/CacheService')
 // Validator
 const AlbumsValidator = require('./validator/albums')
 const SongsValidator = require('./validator/songs')
@@ -24,22 +29,26 @@ const UsersValidator = require('./validator/users')
 const AuthenticationsValidator = require('./validator/authentications')
 const PlaylistsValidator = require('./validator/playlists')
 const CollaborationsValidator = require('./validator/collaborations')
+const ExportsValidator = require('./validator/exports')
+const UploadsValidator = require('./validator/uploads')
 // Token Manager
 const TokenManager = require('./tokenize/TokenManager')
 // Response Template & Exception Handling
-const { errorResponse, failResponse, failAuthResponse } = require('./utils/responses')
+const { errorResponse, failResponse } = require('./utils/responses')
 const ClientError = require('./exceptions/ClientError')
 
 const init = async () => {
-    const albumsService = new AlbumsService()
+    const cacheService = new CacheService()
+    const albumsService = new AlbumsService(cacheService)
     const songsService = new SongsService()
     const usersService = new UsersService()
+    const storageService = new StorageService()
     const authenticationsService = new AuthenticationsService()
     const collaborationsService = new CollaborationsService()
     const playlistsService = new PlaylistsService(collaborationsService)
     const server = Hapi.server({
-        port: process.env.PORT,
-        host: process.env.HOST,
+        host: config.app.host,
+        port: config.app.port,
         routes: {
             cors: {
                 origin: ['*'],
@@ -49,6 +58,9 @@ const init = async () => {
     await server.register([
         {
             plugin: Jwt,
+        },
+        {
+            plugin: Inert,
         },
     ])
     server.auth.strategy('openMusic_jwt', 'jwt', {
@@ -112,16 +124,32 @@ const init = async () => {
                 validator: CollaborationsValidator,
             },
         },
+        {
+            plugin: _exports,
+            options: {
+                service: producerService,
+                validator: ExportsValidator,
+                playlistsService,
+            },
+        },
+        {
+            plugin: uploads,
+            options: {
+                service: storageService,
+                validator: UploadsValidator,
+                albumsService,
+            },
+        },
     ])
     server.ext('onPreResponse', (request, h) => {
         const { response } = request
         if (response instanceof ClientError) {
             return failResponse(h, response)
         }
+        if (!response.isServer) {
+            return h.continue;
+        }
         if (response instanceof Error) {
-            if (response.output.statusCode === 401) {
-                return failAuthResponse(h, response)
-            }
             return errorResponse(h)
         }
         return response.continue || response
